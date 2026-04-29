@@ -2,11 +2,14 @@ import { supabase } from './supabase';
 
 const IMAGES_BUCKET = process.env.EXPO_PUBLIC_SUPABASE_IMAGES_BUCKET ?? 'images';
 const AUDIO_BUCKET = process.env.EXPO_PUBLIC_SUPABASE_AUDIO_BUCKET ?? 'audio';
+const VIDEO_BUCKET = process.env.EXPO_PUBLIC_SUPABASE_VIDEO_BUCKET ?? 'videos';
 
-type UploadKind = 'image' | 'audio';
+type UploadKind = 'image' | 'audio' | 'video';
 
 function getBucket(kind: UploadKind) {
-  return kind === 'image' ? IMAGES_BUCKET : AUDIO_BUCKET;
+  if (kind === 'image') return IMAGES_BUCKET;
+  if (kind === 'audio') return AUDIO_BUCKET;
+  return VIDEO_BUCKET;
 }
 
 function extFromMime(mimeType: string | undefined, fallback: string) {
@@ -31,7 +34,10 @@ export async function uploadMediaToSupabase(params: {
 
   const { fileUri, mimeType, kind } = params;
   const bucket = getBucket(kind);
-  const ext = extFromMime(mimeType, kind === 'image' ? 'jpg' : 'mp3');
+  const ext = extFromMime(
+    mimeType,
+    kind === 'image' ? 'jpg' : kind === 'audio' ? 'mp3' : 'mp4'
+  );
   const fileName =
     typeof globalThis.crypto?.randomUUID === 'function'
       ? globalThis.crypto.randomUUID()

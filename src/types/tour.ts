@@ -49,6 +49,7 @@ export interface TourStep {
   point: GeoPoint;
   audioUrl?: string;
   imageUrl?: string;
+  videoUrl?: string;
 }
 
 /** Полная модель тура. */

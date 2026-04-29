@@ -28,6 +28,7 @@ export const RootNavigator: React.FC = () => {
   const [ready, setReady] = useState(!supabase);
   const replaceTours = useToursStore((s) => s.replaceTours);
   const clearTours = useToursStore((s) => s.clearTours);
+  const setIsLoadingTours = useToursStore((s) => s.setIsLoadingTours);
   const setSyncNotice = useToursStore((s) => s.setSyncNotice);
 
   useEffect(() => {
@@ -54,16 +55,22 @@ export const RootNavigator: React.FC = () => {
 
   useEffect(() => {
     if (!session) {
+      setIsLoadingTours(false);
       clearTours();
       return;
     }
 
     let cancelled = false;
+    setIsLoadingTours(true);
     loadAllToursFromSupabase()
       .then((tours) => {
-        if (!cancelled) replaceTours(tours);
+        if (!cancelled) {
+          replaceTours(tours);
+          setIsLoadingTours(false);
+        }
       })
       .catch((error) => {
+        setIsLoadingTours(false);
         if (isSupabaseToursTableMissingError(error)) {
           setSyncNotice(error.message);
           return;
@@ -74,7 +81,7 @@ export const RootNavigator: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [session, replaceTours, clearTours, setSyncNotice]);
+  }, [session, replaceTours, clearTours, setIsLoadingTours, setSyncNotice]);
 
   if (!ready) return null;
 

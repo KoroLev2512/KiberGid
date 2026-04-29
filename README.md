@@ -92,6 +92,7 @@ EXPO_PUBLIC_SUPABASE_REDIRECT_URL=https://admin.your-domain.com/
 EXPO_PUBLIC_SUPABASE_TOURS_TABLE=tours
 EXPO_PUBLIC_SUPABASE_IMAGES_BUCKET=images
 EXPO_PUBLIC_SUPABASE_AUDIO_BUCKET=audio
+EXPO_PUBLIC_SUPABASE_VIDEO_BUCKET=videos
 ```
 
 Дополнительно поддерживается старое имя ключа: `EXPO_PUBLIC_SUPABASE_KEY`.
@@ -103,6 +104,7 @@ EXPO_PUBLIC_SUPABASE_AUDIO_BUCKET=audio
 Для загрузки медиа из шага маршрута нужны Storage buckets:
 - `images` (или имя из `EXPO_PUBLIC_SUPABASE_IMAGES_BUCKET`)
 - `audio` (или имя из `EXPO_PUBLIC_SUPABASE_AUDIO_BUCKET`)
+- `videos` (или имя из `EXPO_PUBLIC_SUPABASE_VIDEO_BUCKET`)
 
 После этого перезапустите Expo с очисткой кэша:
 

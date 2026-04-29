@@ -1,5 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
+  Animated,
   Alert,
   FlatList,
   Pressable,
@@ -7,6 +9,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../components/Button';
 import { EmptyState } from '../components/EmptyState';
@@ -25,6 +28,7 @@ export const ToursListScreen: React.FC<ScreenProps<'ToursList'>> = ({
   navigation,
 }) => {
   const tours = useToursStore((s) => s.tours);
+  const isLoadingTours = useToursStore((s) => s.isLoadingTours);
   const syncNotice = useToursStore((s) => s.syncNotice);
   const setSyncNotice = useToursStore((s) => s.setSyncNotice);
   const createTour = useToursStore((s) => s.createTour);
@@ -151,34 +155,50 @@ export const ToursListScreen: React.FC<ScreenProps<'ToursList'>> = ({
         </View>
       </View>
 
-      <FlatList
-        data={filtered}
-        keyExtractor={(t) => t.id}
-        contentContainerStyle={styles.list}
-        ListEmptyComponent={
-          <EmptyState
-            title="Пока ни одного тура"
-            description="Создайте первый маршрут — мы проведём вас по всем шагам."
-          >
-            <Button
-              title="Создать первый тур"
-              variant="black"
-              onPress={handleCreate}
+      {isLoadingTours ? (
+        <FlatList
+          data={SKELETON_ITEMS}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.list}
+          renderItem={() => <TourCardSkeleton />}
+        />
+      ) : (
+        <FlatList
+          data={filtered}
+          keyExtractor={(t) => t.id}
+          contentContainerStyle={styles.list}
+          ListEmptyComponent={
+            <EmptyState
+              title="Пока ни одного тура"
+              description="Создайте первый маршрут — мы проведём вас по всем шагам."
+            >
+              <Button
+                title="Создать первый тур"
+                variant="black"
+                onPress={handleCreate}
+              />
+            </EmptyState>
+          }
+          renderItem={({ item }) => (
+            <TourCard
+              tour={item}
+              onPress={() =>
+                navigation.navigate('TourEditor', { tourId: item.id })
+              }
+              onLongPress={() => handleLongPress(item)}
             />
-          </EmptyState>
-        }
-        renderItem={({ item }) => (
-          <TourCard
-            tour={item}
-            onPress={() =>
-              navigation.navigate('TourEditor', { tourId: item.id })
-            }
-            onLongPress={() => handleLongPress(item)}
-          />
-        )}
-      />
+          )}
+        />
+      )}
 
-      {filtered.length > 0 && (
+      {isLoadingTours ? (
+        <View style={styles.loadingFooter}>
+          <ActivityIndicator size="small" color={colors.primary} />
+          <Text style={styles.loadingText}>Загружаем туры...</Text>
+        </View>
+      ) : null}
+
+      {!isLoadingTours && filtered.length > 0 && (
         <View style={styles.bottomBar}>
           <Button title="Создать тур" variant="black" onPress={handleCreate} />
         </View>
@@ -192,6 +212,12 @@ interface TourCardProps {
   onPress: () => void;
   onLongPress: () => void;
 }
+
+const SKELETON_ITEMS = [
+  { id: 'skeleton-1' },
+  { id: 'skeleton-2' },
+  { id: 'skeleton-3' },
+];
 
 const TourCard: React.FC<TourCardProps> = ({ tour, onPress, onLongPress }) => {
   const geo = [tour.city, tour.country].filter(Boolean).join(', ');
@@ -216,6 +242,62 @@ const TourCard: React.FC<TourCardProps> = ({ tour, onPress, onLongPress }) => {
         {stepsCount} {pluralSteps(stepsCount)} · {localeLabel(tour.locale)}
       </Text>
     </Pressable>
+  );
+};
+
+const TourCardSkeleton: React.FC = () => (
+  <SkeletonCard />
+);
+
+const SkeletonCard: React.FC = () => {
+  const shimmer = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    shimmer.setValue(0);
+    const animation = Animated.loop(Animated.timing(shimmer, {
+      toValue: 1,
+      duration: 1100,
+      useNativeDriver: true,
+    }));
+    animation.start();
+    return () => animation.stop();
+  }, [shimmer]);
+
+  const shimmerTranslateX = shimmer.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-180, 240],
+  });
+
+  const renderSkeletonLine = (style: object) => (
+    <View style={[styles.skeletonLine, style]}>
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          styles.shimmerLayer,
+          {
+            transform: [{ translateX: shimmerTranslateX }],
+          },
+        ]}
+      >
+        <LinearGradient
+          colors={['rgba(255,255,255,0)', 'rgba(255,255,255,0.55)', 'rgba(255,255,255,0)']}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
+          style={styles.shimmerGradient}
+        />
+      </Animated.View>
+    </View>
+  );
+
+  return (
+    <View style={styles.card}>
+      <View style={styles.skeletonHeader}>
+        {renderSkeletonLine(styles.skeletonBadge)}
+        {renderSkeletonLine(styles.skeletonTicket)}
+      </View>
+      {renderSkeletonLine(styles.skeletonTitle)}
+      {renderSkeletonLine(styles.skeletonMeta)}
+    </View>
   );
 };
 
@@ -307,5 +389,61 @@ const styles = StyleSheet.create({
     left: spacing.lg,
     right: spacing.lg,
     bottom: spacing.xl,
+  },
+  loadingFooter: {
+    position: 'absolute',
+    left: spacing.lg,
+    right: spacing.lg,
+    bottom: spacing.xl,
+    borderRadius: radius.input,
+    backgroundColor: colors.bgSurface,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: spacing.sm,
+    ...shadows.card,
+  },
+  loadingText: {
+    ...typography.caption,
+    color: colors.textSecondary,
+  },
+  skeletonHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.sm,
+  },
+  skeletonLine: {
+    borderRadius: radius.pill,
+    backgroundColor: colors.bgStatCard,
+    overflow: 'hidden',
+  },
+  skeletonBadge: {
+    width: 96,
+    height: 24,
+  },
+  skeletonTicket: {
+    width: 72,
+    height: 16,
+  },
+  skeletonTitle: {
+    width: '78%',
+    height: 18,
+    marginBottom: spacing.sm,
+  },
+  skeletonMeta: {
+    width: '62%',
+    height: 14,
+  },
+  shimmerLayer: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: 110,
+  },
+  shimmerGradient: {
+    flex: 1,
   },
 });

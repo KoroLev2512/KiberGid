@@ -14,7 +14,9 @@ import { makeId } from '../utils/id';
 
 interface ToursState {
   tours: Tour[];
+  isLoadingTours: boolean;
   syncNotice: string | null;
+  setIsLoadingTours: (value: boolean) => void;
   setSyncNotice: (message: string | null) => void;
   replaceTours: (tours: Tour[]) => void;
   clearTours: () => void;
@@ -72,7 +74,9 @@ export const useToursStore = create<ToursState>()(
   persist(
     (set, get) => ({
       tours: [],
+      isLoadingTours: false,
       syncNotice: null,
+      setIsLoadingTours: (value) => set({ isLoadingTours: value }),
       setSyncNotice: (message) => set({ syncNotice: message }),
       replaceTours: (tours) => set({ tours }),
       clearTours: () => set({ tours: [], syncNotice: null }),
@@ -174,6 +178,7 @@ export const useToursStore = create<ToursState>()(
           point: step?.point ?? {},
           audioUrl: step?.audioUrl,
           imageUrl: step?.imageUrl,
+          videoUrl: step?.videoUrl,
         };
         set({
           tours: get().tours.map((t) => {
