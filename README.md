@@ -61,6 +61,10 @@ npm run web     # веб-режим Expo
 - `preview` → APK (внутреннее тестирование)
 - `production` → AAB (Google Play)
 
+Совет по уменьшению веса:
+- для релиза лучше собирать **AAB** (Play Market сам режет по ABI и плотностям);
+- для APK включены **ABI splits** (`armeabi-v7a`, `arm64-v8a`), поэтому APK обычно меньше.
+
 Команды:
 
 ```bash

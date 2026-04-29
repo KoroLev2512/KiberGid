@@ -1,5 +1,12 @@
 import React from 'react';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextStyle,
+  View,
+} from 'react-native';
 import { colors, radius, spacing, typography } from '../theme';
 
 export interface SegmentOption<T extends string> {
@@ -11,12 +18,14 @@ interface SegmentedControlProps<T extends string> {
   options: SegmentOption<T>[];
   value: T;
   onChange: (value: T) => void;
+  textStyle?: TextStyle;
 }
 
 export function SegmentedControl<T extends string>({
   options,
   value,
   onChange,
+  textStyle,
 }: SegmentedControlProps<T>) {
   return (
     <View style={styles.wrap}>
@@ -28,7 +37,7 @@ export function SegmentedControl<T extends string>({
             onPress={() => onChange(opt.value)}
             style={[styles.seg, active && styles.segActive]}
           >
-            <Text style={[styles.text, active && styles.textActive]}>
+            <Text style={[styles.text, textStyle, active && styles.textActive]}>
               {opt.label}
             </Text>
           </Pressable>

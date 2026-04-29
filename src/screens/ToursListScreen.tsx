@@ -134,10 +134,11 @@ export const ToursListScreen: React.FC<ScreenProps<'ToursList'>> = ({
             { value: 'all', label: 'Все' },
             { value: 'draft', label: 'Черновики' },
             { value: 'ready', label: 'Готовы' },
-            { value: 'published', label: 'Опубликованные' },
+            { value: 'published', label: 'Опубликованы' },
           ]}
           value={filter}
           onChange={setFilter}
+          textStyle={styles.filterText}
         />
       </View>
 
@@ -226,6 +227,9 @@ const styles = StyleSheet.create({
   filter: {
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.md,
+  },
+  filterText: {
+    fontSize: 13,
   },
   authBar: {
     paddingHorizontal: spacing.lg,
