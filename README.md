@@ -90,6 +90,8 @@ EXPO_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
 EXPO_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
 EXPO_PUBLIC_SUPABASE_REDIRECT_URL=https://admin.your-domain.com/
 EXPO_PUBLIC_SUPABASE_TOURS_TABLE=tours
+EXPO_PUBLIC_SUPABASE_IMAGES_BUCKET=images
+EXPO_PUBLIC_SUPABASE_AUDIO_BUCKET=audio
 ```
 
 Дополнительно поддерживается старое имя ключа: `EXPO_PUBLIC_SUPABASE_KEY`.
@@ -97,6 +99,10 @@ EXPO_PUBLIC_SUPABASE_TOURS_TABLE=tours
 `EXPO_PUBLIC_SUPABASE_REDIRECT_URL` (иначе на web в dev будет использоваться localhost).
 Если у тебя в проекте таблица называется иначе (например `routes`), укажи это
 в `EXPO_PUBLIC_SUPABASE_TOURS_TABLE`.
+
+Для загрузки медиа из шага маршрута нужны Storage buckets:
+- `images` (или имя из `EXPO_PUBLIC_SUPABASE_IMAGES_BUCKET`)
+- `audio` (или имя из `EXPO_PUBLIC_SUPABASE_AUDIO_BUCKET`)
 
 После этого перезапустите Expo с очисткой кэша:
 

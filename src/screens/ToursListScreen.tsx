@@ -94,9 +94,8 @@ export const ToursListScreen: React.FC<ScreenProps<'ToursList'>> = ({
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <ScreenHeader title="Мои туры" subtitle="KiberGid Admin" />
       <View style={styles.authBar}>
-        <View style={styles.authActions}>
+        <View style={styles.authLeft}>
           {admin ? (
             <Button
               title="Админка"
@@ -106,15 +105,16 @@ export const ToursListScreen: React.FC<ScreenProps<'ToursList'>> = ({
               onPress={() => navigation.navigate('AdminPanel')}
             />
           ) : null}
-          <Button
-            title="Выйти"
-            variant="secondary"
-            size="sm"
-            fullWidth={false}
-            onPress={handleSignOut}
-          />
         </View>
+        <Button
+          title="Выйти"
+          variant="secondary"
+          size="sm"
+          fullWidth={false}
+          onPress={handleSignOut}
+        />
       </View>
+      <ScreenHeader title="Мои туры" subtitle="KiberGid Admin" />
       {syncNotice ? (
         <View style={styles.noticeBanner}>
           <Text style={styles.noticeText}>{syncNotice}</Text>
@@ -129,9 +129,9 @@ export const ToursListScreen: React.FC<ScreenProps<'ToursList'>> = ({
       ) : null}
 
       <View style={styles.filter}>
+        <View style={styles.filterBlock}>
         <SegmentedControl<Filter>
           options={[
-            { value: 'all', label: 'Все' },
             { value: 'draft', label: 'Черновики' },
             { value: 'ready', label: 'Готовы' },
             { value: 'published', label: 'Опубликованы' },
@@ -139,7 +139,16 @@ export const ToursListScreen: React.FC<ScreenProps<'ToursList'>> = ({
           value={filter}
           onChange={setFilter}
           textStyle={styles.filterText}
+          compact
         />
+        <SegmentedControl<Filter>
+          options={[{ value: 'all', label: 'Все' }]}
+          value={filter}
+          onChange={() => setFilter('all')}
+          textStyle={styles.filterText}
+          compact
+        />
+        </View>
       </View>
 
       <FlatList
@@ -228,17 +237,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.md,
   },
+  filterBlock: {
+    backgroundColor: colors.bgStatCard,
+    borderRadius: radius.chip,
+    padding: 4,
+    gap: spacing.sm,
+  },
   filterText: {
     fontSize: 13,
   },
   authBar: {
     paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.md,
-    alignItems: 'flex-end',
-  },
-  authActions: {
+    paddingTop: spacing.md,
+    marginTop: -spacing.xs,
     flexDirection: 'row',
-    gap: spacing.sm,
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+  },
+  authLeft: {
+    minWidth: 96,
   },
   noticeBanner: {
     marginHorizontal: spacing.lg,

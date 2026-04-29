@@ -6,6 +6,7 @@ import {
   Text,
   TextStyle,
   View,
+  ViewStyle,
 } from 'react-native';
 import { colors, radius, spacing, typography } from '../theme';
 
@@ -19,6 +20,8 @@ interface SegmentedControlProps<T extends string> {
   value: T;
   onChange: (value: T) => void;
   textStyle?: TextStyle;
+  containerStyle?: ViewStyle;
+  compact?: boolean;
 }
 
 export function SegmentedControl<T extends string>({
@@ -26,9 +29,11 @@ export function SegmentedControl<T extends string>({
   value,
   onChange,
   textStyle,
+  containerStyle,
+  compact = false,
 }: SegmentedControlProps<T>) {
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.wrap, compact && styles.wrapCompact, containerStyle]}>
       {options.map((opt) => {
         const active = opt.value === value;
         return (
@@ -53,6 +58,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bgStatCard,
     borderRadius: radius.chip,
     padding: 4,
+  },
+  wrapCompact: {
+    backgroundColor: 'transparent',
+    padding: 0,
   },
   seg: {
     flex: 1,

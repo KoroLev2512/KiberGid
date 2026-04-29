@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -7,12 +7,15 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
+import * as DocumentPicker from 'expo-document-picker';
+import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Row } from '../components/Row';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Section } from '../components/Section';
+import { uploadMediaToSupabase } from '../lib/supabaseStorage';
 import { ScreenProps } from '../navigation/types';
 import { useToursStore } from '../store/toursStore';
 import { colors, spacing } from '../theme';
@@ -31,6 +34,8 @@ export const StepEditorScreen: React.FC<ScreenProps<'StepEditor'>> = ({
   });
   const updateStep = useToursStore((s) => s.updateStep);
   const deleteStep = useToursStore((s) => s.deleteStep);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingAudio, setUploadingAudio] = useState(false);
 
   if (!step) {
     return (
@@ -52,6 +57,54 @@ export const StepEditorScreen: React.FC<ScreenProps<'StepEditor'>> = ({
         },
       },
     ]);
+  };
+
+  const handlePickImage = async () => {
+    setUploadingImage(true);
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        quality: 0.85,
+      });
+      if (result.canceled || result.assets.length === 0) return;
+      const asset = result.assets[0];
+      const publicUrl = await uploadMediaToSupabase({
+        fileUri: asset.uri,
+        mimeType: asset.mimeType,
+        kind: 'image',
+      });
+      updateStep(tourId, stepId, { imageUrl: publicUrl });
+      Alert.alert('Готово', 'Изображение загружено.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Не удалось загрузить изображение.';
+      Alert.alert('Ошибка', message);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handlePickAudio = async () => {
+    setUploadingAudio(true);
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'audio/*',
+        copyToCacheDirectory: true,
+      });
+      if (result.canceled || result.assets.length === 0) return;
+      const asset = result.assets[0];
+      const publicUrl = await uploadMediaToSupabase({
+        fileUri: asset.uri,
+        mimeType: asset.mimeType,
+        kind: 'audio',
+      });
+      updateStep(tourId, stepId, { audioUrl: publicUrl });
+      Alert.alert('Готово', 'Аудио загружено.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Не удалось загрузить аудио.';
+      Alert.alert('Ошибка', message);
+    } finally {
+      setUploadingAudio(false);
+    }
   };
 
   return (
@@ -104,7 +157,19 @@ export const StepEditorScreen: React.FC<ScreenProps<'StepEditor'>> = ({
             />
           </Section>
 
-          <Section label="Медиа" title="Ссылки (необязательно)">
+          <Section label="Медиа" title="Файлы (необязательно)">
+            <Button
+              title="Загрузить аудио файл"
+              variant="secondary"
+              loading={uploadingAudio}
+              onPress={() => void handlePickAudio()}
+            />
+            <Button
+              title="Загрузить фото"
+              variant="secondary"
+              loading={uploadingImage}
+              onPress={() => void handlePickImage()}
+            />
             <Input
               variant="white"
               label="Аудио (URL)"
